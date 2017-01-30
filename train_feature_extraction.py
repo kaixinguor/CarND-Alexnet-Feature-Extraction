@@ -3,6 +3,7 @@ import tensorflow as tf
 from sklearn.model_selection import train_test_split
 from alexnet import AlexNet
 from sklearn.utils import shuffle
+import time
 
 # TODO: Load traffic signs data.
 with open('train.p','rb') as f:
@@ -19,8 +20,6 @@ X = tf.placeholder(dtype=tf.float32,shape=(None,32,32,3))
 X_normalized = tf.image.resize_images(X,size=(227,227))
 y = tf.placeholder(dtype=tf.int32,shape=(None))
 one_hot_y = tf.one_hot(y,depth=nb_classes)
-
-
 
 # TODO: pass placeholder as first argument to `AlexNet`.
 fc7 = AlexNet(X_normalized, feature_extract=True)
@@ -59,12 +58,14 @@ def evaluate(X_data, y_data):
 # TODO: Train and evaluate the feature extraction model.
 EPOCHS = 10
 BATCH_SIZE = 128
+print(X_train.shape)
 with tf.Session() as sess:
     sess.run(tf.global_variables_initializer())
 
     print("Training ...")
     for epoch in range(EPOCHS):
-        exp_train_X, exp_train_y = shuffle(X_train, y_train)
+        t = time.time()
+        exp_train_X, exp_train_y = (X_train, y_train)
 
         # Loop over all batches
         for offset in range(0, nb_train, BATCH_SIZE):
@@ -76,6 +77,7 @@ with tf.Session() as sess:
             # Run optimization op (backprop) and cost op (to get loss value)
             sess.run(optimizer, feed_dict={X: batch_X, y: batch_y})
 
+        print("time elapsed {} ".format(time.time()-t))
         validation_accuracy = evaluate(X_valid, y_valid)
         print("EPOCH {} ...".format(epoch + 1))
         print("Validation Accuracy = {:.3f}".format(validation_accuracy))
